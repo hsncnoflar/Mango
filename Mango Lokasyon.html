@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mango Stok Hataları</title>
+
+<style>
+body {font-family: Arial; margin:0; background:#f1f5f9;}
+
+header {
+background:linear-gradient(90deg,#2563eb,#1e40af);
+color:white;
+padding:18px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+}
+
+.counter-box {
+text-align:center;
+padding:12px;
+background:#dbeafe;
+font-size:18px;
+font-weight:bold;
+color:#1e3a8a;
+}
+
+.filter-bar {
+text-align:center;
+padding:15px;
+background:white;
+}
+
+button {
+padding:10px 18px;
+margin:5px;
+border:none;
+background:#2563eb;
+color:white;
+border-radius:20px;
+font-weight:bold;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover {
+background:#1e40af;
+}
+
+button.active {
+background:#1e3a8a;
+box-shadow:0 0 0 3px rgba(30,58,138,0.2);
+}
+
+.gallery {
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+gap:15px;
+padding:20px;
+}
+
+.gallery img {
+width:100%;
+border-radius:10px;
+cursor:pointer;
+}
+
+.hidden {display:none;}
+</style>
+</head>
+
+<body>
+
+<header>Mango Stok Hataları</header>
+
+<div class="counter-box">
+Toplam Hata: <span id="counter">0</span>
+</div>
+
+<div class="filter-bar" id="filterBar">
+<button class="active" onclick="filterSelection('all', this)">Tümü</button>
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<script>
+const gallery = document.getElementById("gallery");
+const filterBar = document.getElementById("filterBar");
+
+const corridors = [
+"F2001","F2002","F2003","F2004","F2005","F2006",
+"F2007","F2008","F2009","F2010","F2011","F2012",
+"F2013","F2014","F2015","F2016","F2017","F2018"
+];
+
+const maxPhotos = 100;
+const corridorCounts = {};
+
+// filtre butonlarını oluştur
+corridors.forEach(cor => {
+    corridorCounts[cor] = 0;
+
+    const btn = document.createElement("button");
+    btn.innerText = cor.replace("F2","F2 ") + " (0)";
+    btn.setAttribute("data-cor", cor);
+    btn.onclick = function(){
+        filterSelection(cor, this);
+    };
+    filterBar.appendChild(btn);
+});
+
+// foto yükleme
+corridors.forEach(cor => {
+    for(let i=1; i<=maxPhotos; i++){
+        const formats = [".jpg",".png",".jpeg"];
+
+        formats.forEach(ext => {
+
+            // foto1.jpg
+            const img1 = new Image();
+            img1.src = "images/" + cor + "/foto" + i + ext;
+            img1.className = cor;
+            img1.onload = function(){
+                gallery.appendChild(this);
+                corridorCounts[cor]++;
+                updateButtons();
+            };
+
+            // foto (1).jpg
+            const img2 = new Image();
+            img2.src = "images/" + cor + "/foto (" + i + ")" + ext;
+            img2.className = cor;
+            img2.onload = function(){
+                gallery.appendChild(this);
+                corridorCounts[cor]++;
+                updateButtons();
+            };
+
+        });
+    }
+});
+
+function updateButtons(){
+    corridors.forEach(cor => {
+        const btn = document.querySelector('button[data-cor="'+cor+'"]');
+        if(btn){
+            btn.innerText = cor.replace("F2","F2 ") + " (" + corridorCounts[cor] + ")";
+        }
+    });
+
+    updateCounter();
+}
+
+function updateCounter(){
+    var visibleImages = document.querySelectorAll(".gallery img:not(.hidden)");
+    document.getElementById("counter").innerText = visibleImages.length;
+}
+
+function filterSelection(category, btn){
+    var images = document.querySelectorAll(".gallery img");
+
+    images.forEach(function(img){
+        if(category==="all"){
+            img.classList.remove("hidden");
+        } else {
+            if(img.classList.contains(category)){
+                img.classList.remove("hidden");
+            } else {
+                img.classList.add("hidden");
+            }
+        }
+    });
+
+    // aktif buton efekti
+    document.querySelectorAll(".filter-bar button").forEach(b => b.classList.remove("active"));
+    if(btn) btn.classList.add("active");
+
+    updateCounter();
+}
+
+window.onload = function(){
+    filterSelection('all', document.querySelector(".filter-bar button"));
+};
+</script>
+
+</body>
+</html>
