@@ -5,142 +5,191 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arvato | Mango Stok Hataları</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f1f5f9; color: #334155; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f8fafc; color: #1e293b; }
         
-        /* Header Düzeni */
+        /* Üst Bilgi Alanı */
         header { 
-            background: linear-gradient(90deg, #2563eb, #1e40af); 
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); 
             color: white; 
-            padding: 20px; 
+            padding: 15px 25px; 
             display: flex; 
             align-items: center; 
-            justify-content: center; /* Ortadaki başlık için */
-            position: relative; /* Sol üstteki yazı için referans */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            justify-content: space-between; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
-        .brand-logo { 
-            position: absolute; 
-            left: 20px; 
-            font-size: 18px; 
-            font-weight: 300; 
-            letter-spacing: 1px;
-            opacity: 0.9;
-        }
-
-        .main-title { 
-            font-size: 26px; 
-            font-weight: bold; 
-        }
-
-        .counter-box { text-align: center; padding: 15px; background: #dbeafe; font-size: 20px; font-weight: bold; color: #1e3a8a; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #bfdbfe; }
-        .filter-bar { text-align: center; padding: 15px; background: white; border-bottom: 1px solid #e2e8f0; }
+        .brand { font-size: 1.2rem; font-weight: 300; letter-spacing: 2px; }
+        .title { font-size: 1.5rem; font-weight: 700; text-transform: uppercase; }
         
-        button { padding: 10px 18px; margin: 5px; border: none; background: #e2e8f0; color: #475569; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #cbd5e1; }
-        button.active { background: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4); }
-        
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
-        .gallery img { width: 100%; height: auto; border-radius: 12px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .gallery img:hover { transform: scale(1.03); }
+        /* Sayaç Kutusu */
+        .status-bar {
+            background: #ffffff;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .counter {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            display: inline-block;
+        }
+
+        /* Filtreleme Alanı */
+        .filters {
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            background: #fff;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: #f1f5f9;
+            color: #64748b;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        button:hover { background: #e2e8f0; }
+
+        button.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Galeri Alanı */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 25px;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            background: #e2e8f0; /* Yüklenirken gri kutu görünür */
+        }
+
+        .gallery img:hover { transform: translateY(-5px); }
+
         .hidden { display: none; }
 
-        /* Mobil uyumluluk: Arvato yazısı çok yer kaplarsa diye */
-        @media (max-width: 600px) {
-            .brand-logo { position: static; margin-bottom: 10px; }
-            header { flex-direction: column; padding: 10px; }
+        /* Mobil Düzenleme */
+        @media (max-width: 640px) {
+            header { flex-direction: column; gap: 5px; text-align: center; }
+            .brand { font-size: 0.9rem; }
+            .title { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="brand-logo">ARVATO</div>
-    <div class="main-title">Mango Stok Hataları</div>
-</header>
+    <div class="brand">ARVATO</div>
+    <div class="title">Mango Stok Hataları</div>
+    <div style="width: 80px;"></div> </header>
 
-<div class="counter-box">
-    Toplam Hata: <span id="counter">0</span>
+<div class="status-bar">
+    <div class="counter">Görüntülenen Hata: <span id="countText">0</span></div>
 </div>
 
-<div class="filter-bar" id="filterBar">
-    <button class="active" onclick="filterSelection('all', this)">Tümü</button>
+<div class="filters" id="filterContainer">
+    <button class="active" onclick="applyFilter('all', this)">TÜMÜ</button>
 </div>
 
-<div class="gallery" id="gallery"></div>
+<div class="gallery" id="mainGallery"></div>
 
 <script>
-const gallery = document.getElementById("gallery");
-const filterBar = document.getElementById("filterBar");
+    const corridors = ["F2001","F2002","F2003","F2004","F2005","F2006","F2007","F2008","F2009","F2010","F2011","F2012","F2013","F2014","F2015","F2016","F2017","F2018"];
+    const gallery = document.getElementById("mainGallery");
+    const filterContainer = document.getElementById("filterContainer");
+    const counts = {};
 
-const corridors = [
-    "F2001","F2002","F2003","F2004","F2005","F2006",
-    "F2007","F2008","F2009","F2010","F2011","F2012",
-    "F2013","F2014","F2015","F2016","F2017","F2018"
-];
-
-const maxPhotos = 50; 
-const corridorCounts = {};
-
-corridors.forEach(cor => {
-    corridorCounts[cor] = 0;
-    const btn = document.createElement("button");
-    btn.innerText = cor.replace("F2","F2 ") + " (0)";
-    btn.setAttribute("data-cor", cor);
-    btn.onclick = function() { filterSelection(cor, this); };
-    filterBar.appendChild(btn);
-});
-
-corridors.forEach(cor => {
-    for(let i=1; i<=maxPhotos; i++){
-        const formats = [".jpg", ".png", ".jpeg", ".JPG"];
-        formats.forEach(ext => {
-            const names = ["foto" + i, "foto (" + i + ")"];
-            names.forEach(name => {
-                const img = new Image();
-                img.src = "images/" + cor + "/" + name + ext;
-                img.className = cor;
-                img.loading = "lazy";
-                
-                img.onload = function(){
-                    gallery.appendChild(this);
-                    corridorCounts[cor]++;
-                    updateButtons();
-                    if(document.querySelector(".active").innerText.includes("Tümü")) {
-                        updateCounter();
-                    }
-                };
-            });
-        });
-    }
-});
-
-function updateButtons(){
+    // 1. Butonları Dinamik Oluştur
     corridors.forEach(cor => {
-        const btn = document.querySelector('button[data-cor="'+cor+'"]');
-        if(btn) btn.innerText = cor.replace("F2","F2 ") + " (" + corridorCounts[cor] + ")";
+        counts[cor] = 0;
+        const btn = document.createElement("button");
+        btn.innerText = cor.replace("F2", "F2 ") + " (0)";
+        btn.setAttribute("data-cor", cor);
+        btn.onclick = function() { applyFilter(cor, this); };
+        filterContainer.appendChild(btn);
     });
-}
 
-function updateCounter(){
-    const visibleImages = document.querySelectorAll(".gallery img:not(.hidden)");
-    document.getElementById("counter").innerText = visibleImages.length;
-}
+    // 2. Fotoğrafları Akıllı Yükle (GitHub Pages Uyumluluğu ile)
+    corridors.forEach(cor => {
+        for(let i = 1; i <= 40; i++) { // Her klasör için ilk 40 fotoğrafı tara
+            const extensions = [".jpg", ".JPG", ".jpeg", ".png"];
+            const formats = ["foto" + i, "foto (" + i + ")"];
 
-function filterSelection(category, btn){
-    const images = document.querySelectorAll(".gallery img");
-    images.forEach(img => {
-        if(category === "all" || img.classList.contains(category)){
-            img.classList.remove("hidden");
-        } else {
-            img.classList.add("hidden");
+            extensions.forEach(ext => {
+                formats.forEach(name => {
+                    const img = new Image();
+                    // GitHub'daki Images klasör adın neyse ona dikkat et: 
+                    // Aşağıdaki 'images' kısmını klasörün büyükse 'Images' yap.
+                    img.src = "images/" + cor + "/" + name + ext; 
+                    img.className = cor;
+                    img.loading = "lazy"; // Performans için
+
+                    img.onload = function() {
+                        gallery.appendChild(this);
+                        counts[cor]++;
+                        updateInterface();
+                    };
+                });
+            });
         }
     });
 
-    document.querySelectorAll(".filter-bar button").forEach(b => b.classList.remove("active"));
-    if(btn) btn.classList.add("active");
-    updateCounter();
-}
+    function updateInterface() {
+        // Butonlardaki sayıları güncelle
+        corridors.forEach(cor => {
+            const btn = document.querySelector(`button[data-cor="${cor}"]`);
+            if(btn) btn.innerText = cor.replace("F2", "F2 ") + " (" + counts[cor] + ")";
+        });
+        updateMainCounter();
+    }
+
+    function updateMainCounter() {
+        const visible = document.querySelectorAll(".gallery img:not(.hidden)").length;
+        document.getElementById("countText").innerText = visible;
+    }
+
+    function applyFilter(cat, btn) {
+        const allImages = document.querySelectorAll(".gallery img");
+        allImages.forEach(img => {
+            if(cat === 'all' || img.classList.contains(cat)) {
+                img.classList.remove("hidden");
+            } else {
+                img.classList.add("hidden");
+            }
+        });
+
+        // Buton stilini güncelle
+        document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        updateMainCounter();
+    }
 </script>
+
 </body>
 </html>
