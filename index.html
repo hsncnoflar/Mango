@@ -6,100 +6,22 @@
     <title>Arvato | Mango Stok Hataları</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f8fafc; color: #1e293b; }
-        
-        /* Üst Bilgi Alanı */
         header { 
             background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); 
-            color: white; 
-            padding: 15px 25px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            color: white; padding: 15px 25px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
-
         .brand { font-size: 1.2rem; font-weight: 300; letter-spacing: 2px; }
         .title { font-size: 1.5rem; font-weight: 700; text-transform: uppercase; }
-        
-        /* Sayaç Kutusu */
-        .status-bar {
-            background: #ffffff;
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid #e2e8f0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .counter {
-            background: #dbeafe;
-            color: #1e40af;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-weight: 800;
-            font-size: 1.1rem;
-            display: inline-block;
-        }
-
-        /* Filtreleme Alanı */
-        .filters {
-            padding: 15px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            background: #fff;
-        }
-
-        button {
-            padding: 8px 16px;
-            border: 1px solid #e2e8f0;
-            background: #f1f5f9;
-            color: #64748b;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        button:hover { background: #e2e8f0; }
-
-        button.active {
-            background: #2563eb;
-            color: white;
-            border-color: #2563eb;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-
-        /* Galeri Alanı */
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 25px;
-        }
-
-        .gallery img {
-            width: 100%;
-            height: 350px;
-            object-fit: cover;
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-            background: #e2e8f0; /* Yüklenirken gri kutu görünür */
-        }
-
+        .status-bar { background: #ffffff; padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .counter { background: #dbeafe; color: #1e40af; padding: 8px 20px; border-radius: 50px; font-weight: 800; font-size: 1.1rem; display: inline-block; }
+        .filters { padding: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; background: #fff; }
+        button { padding: 8px 16px; border: 1px solid #e2e8f0; background: #f1f5f9; color: #64748b; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        button.active { background: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 25px; }
+        .gallery img { width: 100%; height: 350px; object-fit: cover; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: 0.3s; background: #e2e8f0; }
         .gallery img:hover { transform: translateY(-5px); }
-
         .hidden { display: none; }
-
-        /* Mobil Düzenleme */
-        @media (max-width: 640px) {
-            header { flex-direction: column; gap: 5px; text-align: center; }
-            .brand { font-size: 0.9rem; }
-            .title { font-size: 1.2rem; }
-        }
+        @media (max-width: 640px) { header { flex-direction: column; gap: 5px; text-align: center; } .brand { font-size: 0.9rem; } .title { font-size: 1.2rem; } }
     </style>
 </head>
 <body>
@@ -107,7 +29,8 @@
 <header>
     <div class="brand">ARVATO</div>
     <div class="title">Mango Stok Hataları</div>
-    <div style="width: 80px;"></div> </header>
+    <div style="width: 80px;"></div>
+</header>
 
 <div class="status-bar">
     <div class="counter">Görüntülenen Hata: <span id="countText">0</span></div>
@@ -125,7 +48,7 @@
     const filterContainer = document.getElementById("filterContainer");
     const counts = {};
 
-    // 1. Butonları Dinamik Oluştur
+    // Butonları oluştur
     corridors.forEach(cor => {
         counts[cor] = 0;
         const btn = document.createElement("button");
@@ -135,33 +58,41 @@
         filterContainer.appendChild(btn);
     });
 
-    // 2. Fotoğrafları Akıllı Yükle (GitHub Pages Uyumluluğu ile)
+    // Fotoğrafları hem "images" hem "Images" klasörü için dene
     corridors.forEach(cor => {
-        for(let i = 1; i <= 40; i++) { // Her klasör için ilk 40 fotoğrafı tara
+        for(let i = 1; i <= 40; i++) {
             const extensions = [".jpg", ".JPG", ".jpeg", ".png"];
             const formats = ["foto" + i, "foto (" + i + ")"];
 
             extensions.forEach(ext => {
                 formats.forEach(name => {
-                    const img = new Image();
-                    // GitHub'daki Images klasör adın neyse ona dikkat et: 
-                    // Aşağıdaki 'images' kısmını klasörün büyükse 'Images' yap.
-                    img.src = "images/" + cor + "/" + name + ext; 
-                    img.className = cor;
-                    img.loading = "lazy"; // Performans için
+                    const tryPaths = [
+                        "images/" + cor + "/" + name + ext,
+                        "Images/" + cor + "/" + name + ext
+                    ];
 
-                    img.onload = function() {
-                        gallery.appendChild(this);
-                        counts[cor]++;
-                        updateInterface();
-                    };
+                    tryPaths.forEach(path => {
+                        const img = new Image();
+                        img.src = path; 
+                        img.className = cor;
+                        img.loading = "lazy";
+
+                        img.onload = function() {
+                            // Çift eklemeyi engelle
+                            const isAdded = Array.from(gallery.children).some(el => el.src.includes(path));
+                            if(!isAdded) {
+                                gallery.appendChild(this);
+                                counts[cor]++;
+                                updateInterface();
+                            }
+                        };
+                    });
                 });
             });
         }
     });
 
     function updateInterface() {
-        // Butonlardaki sayıları güncelle
         corridors.forEach(cor => {
             const btn = document.querySelector(`button[data-cor="${cor}"]`);
             if(btn) btn.innerText = cor.replace("F2", "F2 ") + " (" + counts[cor] + ")";
@@ -175,16 +106,9 @@
     }
 
     function applyFilter(cat, btn) {
-        const allImages = document.querySelectorAll(".gallery img");
-        allImages.forEach(img => {
-            if(cat === 'all' || img.classList.contains(cat)) {
-                img.classList.remove("hidden");
-            } else {
-                img.classList.add("hidden");
-            }
+        document.querySelectorAll(".gallery img").forEach(img => {
+            (cat === 'all' || img.classList.contains(cat)) ? img.classList.remove("hidden") : img.classList.add("hidden");
         });
-
-        // Buton stilini güncelle
         document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         updateMainCounter();
