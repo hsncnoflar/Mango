@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arvato | Mango Stok Hataları</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f1f5f9; color: #334155; }
+        
+        /* Header Düzeni */
+        header { 
+            background: linear-gradient(90deg, #2563eb, #1e40af); 
+            color: white; 
+            padding: 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; /* Ortadaki başlık için */
+            position: relative; /* Sol üstteki yazı için referans */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+
+        .brand-logo { 
+            position: absolute; 
+            left: 20px; 
+            font-size: 18px; 
+            font-weight: 300; 
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .main-title { 
+            font-size: 26px; 
+            font-weight: bold; 
+        }
+
+        .counter-box { text-align: center; padding: 15px; background: #dbeafe; font-size: 20px; font-weight: bold; color: #1e3a8a; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #bfdbfe; }
+        .filter-bar { text-align: center; padding: 15px; background: white; border-bottom: 1px solid #e2e8f0; }
+        
+        button { padding: 10px 18px; margin: 5px; border: none; background: #e2e8f0; color: #475569; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #cbd5e1; }
+        button.active { background: #2563eb; color: white; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4); }
+        
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+        .gallery img { width: 100%; height: auto; border-radius: 12px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .gallery img:hover { transform: scale(1.03); }
+        .hidden { display: none; }
+
+        /* Mobil uyumluluk: Arvato yazısı çok yer kaplarsa diye */
+        @media (max-width: 600px) {
+            .brand-logo { position: static; margin-bottom: 10px; }
+            header { flex-direction: column; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand-logo">ARVATO</div>
+    <div class="main-title">Mango Stok Hataları</div>
+</header>
+
+<div class="counter-box">
+    Toplam Hata: <span id="counter">0</span>
+</div>
+
+<div class="filter-bar" id="filterBar">
+    <button class="active" onclick="filterSelection('all', this)">Tümü</button>
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<script>
+const gallery = document.getElementById("gallery");
+const filterBar = document.getElementById("filterBar");
+
+const corridors = [
+    "F2001","F2002","F2003","F2004","F2005","F2006",
+    "F2007","F2008","F2009","F2010","F2011","F2012",
+    "F2013","F2014","F2015","F2016","F2017","F2018"
+];
+
+const maxPhotos = 50; 
+const corridorCounts = {};
+
+corridors.forEach(cor => {
+    corridorCounts[cor] = 0;
+    const btn = document.createElement("button");
+    btn.innerText = cor.replace("F2","F2 ") + " (0)";
+    btn.setAttribute("data-cor", cor);
+    btn.onclick = function() { filterSelection(cor, this); };
+    filterBar.appendChild(btn);
+});
+
+corridors.forEach(cor => {
+    for(let i=1; i<=maxPhotos; i++){
+        const formats = [".jpg", ".png", ".jpeg", ".JPG"];
+        formats.forEach(ext => {
+            const names = ["foto" + i, "foto (" + i + ")"];
+            names.forEach(name => {
+                const img = new Image();
+                img.src = "images/" + cor + "/" + name + ext;
+                img.className = cor;
+                img.loading = "lazy";
+                
+                img.onload = function(){
+                    gallery.appendChild(this);
+                    corridorCounts[cor]++;
+                    updateButtons();
+                    if(document.querySelector(".active").innerText.includes("Tümü")) {
+                        updateCounter();
+                    }
+                };
+            });
+        });
+    }
+});
+
+function updateButtons(){
+    corridors.forEach(cor => {
+        const btn = document.querySelector('button[data-cor="'+cor+'"]');
+        if(btn) btn.innerText = cor.replace("F2","F2 ") + " (" + corridorCounts[cor] + ")";
+    });
+}
+
+function updateCounter(){
+    const visibleImages = document.querySelectorAll(".gallery img:not(.hidden)");
+    document.getElementById("counter").innerText = visibleImages.length;
+}
+
+function filterSelection(category, btn){
+    const images = document.querySelectorAll(".gallery img");
+    images.forEach(img => {
+        if(category === "all" || img.classList.contains(category)){
+            img.classList.remove("hidden");
+        } else {
+            img.classList.add("hidden");
+        }
+    });
+
+    document.querySelectorAll(".filter-bar button").forEach(b => b.classList.remove("active"));
+    if(btn) btn.classList.add("active");
+    updateCounter();
+}
+</script>
+</body>
+</html>
