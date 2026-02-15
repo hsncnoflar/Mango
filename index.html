@@ -2,118 +2,92 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arvato | Mango Stok Hataları</title>
+    <title>Mango Stok Hataları</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f8fafc; color: #1e293b; }
-        header { 
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); 
-            color: white; padding: 15px 25px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #1a1a1a; color: white; }
+        header { background: #000; padding: 25px; text-align: center; border-bottom: 2px solid #333; }
+        .arvato-logo { position: absolute; left: 20px; top: 25px; font-weight: bold; color: #fff; letter-spacing: 1px; }
+        h1 { margin: 0; font-weight: 300; letter-spacing: 4px; }
+        
+        nav { background: #222; display: flex; flex-wrap: wrap; justify-content: center; padding: 10px; sticky: top; }
+        nav button { 
+            background: #333; color: #ccc; border: 1px solid #444; padding: 8px 12px; 
+            margin: 3px; cursor: pointer; border-radius: 4px;
         }
-        .brand { font-size: 1.2rem; font-weight: 300; letter-spacing: 2px; }
-        .title { font-size: 1.5rem; font-weight: 700; text-transform: uppercase; }
-        .status-bar { background: #ffffff; padding: 15px; text-align: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
-        .counter { background: #dbeafe; color: #1e40af; padding: 8px 20px; border-radius: 50px; font-weight: 800; font-size: 1.1rem; display: inline-block; }
-        .filters { padding: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; background: #fff; }
-        button { padding: 8px 16px; border: 1px solid #e2e8f0; background: #f1f5f9; color: #64748b; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        button.active { background: #2563eb; color: white; border-color: #2563eb; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 25px; }
-        .gallery img { width: 100%; height: 350px; object-fit: cover; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: 0.3s; background: #e2e8f0; }
-        .gallery img:hover { transform: translateY(-5px); }
-        .hidden { display: none; }
-        @media (max-width: 640px) { header { flex-direction: column; gap: 5px; text-align: center; } .brand { font-size: 0.9rem; } .title { font-size: 1.2rem; } }
+        nav button:hover { background: #444; color: white; }
+        nav button.active { background: #fff; color: #000; font-weight: bold; }
+
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 30px; }
+        .gallery img { width: 100%; border-radius: 5px; transition: transform 0.2s; cursor: zoom-in; }
+        .gallery img:hover { transform: scale(1.02); }
+        .loading { text-align: center; width: 100%; color: #888; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="brand">ARVATO</div>
-    <div class="title">Mango Stok Hataları</div>
-    <div style="width: 80px;"></div>
+    <div class="arvato-logo">ARVATO</div>
+    <h1>MANGO STOK HATALARI</h1>
 </header>
 
-<div class="status-bar">
-    <div class="counter">Görüntülenen Hata: <span id="countText">0</span></div>
-</div>
-
-<div class="filters" id="filterContainer">
-    <button class="active" onclick="applyFilter('all', this)">TÜMÜ</button>
-</div>
-
-<div class="gallery" id="mainGallery"></div>
+<nav id="tabs"></nav>
+<div id="gallery" class="gallery"><p class="loading">Lütfen yukarıdan bir koridor seçin.</p></div>
 
 <script>
-    const corridors = ["F2001","F2002","F2003","F2004","F2005","F2006","F2007","F2008","F2009","F2010","F2011","F2012","F2013","F2014","F2015","F2016","F2017","F2018"];
-    const gallery = document.getElementById("mainGallery");
-    const filterContainer = document.getElementById("filterContainer");
-    const counts = {};
+    const username = "hsncnoflar"; // GitHub kullanıcı adın
+    const repo = "mango"; // Depo adın
+    const tabsContainer = document.getElementById('tabs');
+    const galleryContainer = document.getElementById('gallery');
 
-    // Butonları oluştur
-    corridors.forEach(cor => {
-        counts[cor] = 0;
-        const btn = document.createElement("button");
-        btn.innerText = cor.replace("F2", "F2 ") + " (0)";
-        btn.setAttribute("data-cor", cor);
-        btn.onclick = function() { applyFilter(cor, this); };
-        filterContainer.appendChild(btn);
+    // Koridorları oluştur (F2 001 - F2 018)
+    const corridors = Array.from({ length: 18 }, (_, i) => `F2 ${String(i + 1).padStart(3, '0')}`);
+
+    corridors.forEach(corridor => {
+        const btn = document.createElement('button');
+        btn.innerText = corridor;
+        btn.onclick = () => fetchImagesFromGitHub(corridor, btn);
+        tabsContainer.appendChild(btn);
     });
 
-    // Fotoğrafları hem "images" hem "Images" klasörü için dene
-    corridors.forEach(cor => {
-        for(let i = 1; i <= 40; i++) {
-            const extensions = [".jpg", ".JPG", ".jpeg", ".png"];
-            const formats = ["foto" + i, "foto (" + i + ")"];
+    async function fetchImagesFromGitHub(corridorName, activeBtn) {
+        // Görsel geri bildirimi
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        activeBtn.classList.add('active');
+        galleryContainer.innerHTML = '<p class="loading">Fotoğraflar yükleniyor...</p>';
 
-            extensions.forEach(ext => {
-                formats.forEach(name => {
-                    const tryPaths = [
-                        "images/" + cor + "/" + name + ext,
-                        "Images/" + cor + "/" + name + ext
-                    ];
+        try {
+            // GitHub API'sini kullanarak klasör içeriğini alıyoruz
+            // Klasör ismindeki boşluğu URL uyumlu hale getiriyoruz (%20)
+            const folderPath = `img/${corridorName}`.replace(/ /g, '%20');
+            const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${folderPath}`);
+            const files = await response.json();
 
-                    tryPaths.forEach(path => {
-                        const img = new Image();
-                        img.src = path; 
-                        img.className = cor;
-                        img.loading = "lazy";
+            galleryContainer.innerHTML = ''; // Yükleniyor yazısını sil
 
-                        img.onload = function() {
-                            // Çift eklemeyi engelle
-                            const isAdded = Array.from(gallery.children).some(el => el.src.includes(path));
-                            if(!isAdded) {
-                                gallery.appendChild(this);
-                                counts[cor]++;
-                                updateInterface();
-                            }
-                        };
-                    });
-                });
+            if (files.message === "Not Found") {
+                galleryContainer.innerHTML = '<p class="loading">Bu koridor için henüz klasör oluşturulmamış.</p>';
+                return;
+            }
+
+            files.forEach(file => {
+                // Sadece resim dosyalarını göster (jpg, png, jpeg)
+                if (file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                    const img = document.createElement('img');
+                    img.src = file.download_url; // Doğrudan GitHub üzerindeki resim linki
+                    galleryContainer.appendChild(img);
+                }
             });
+
+            if (galleryContainer.innerHTML === '') {
+                galleryContainer.innerHTML = '<p class="loading">Bu klasörde henüz fotoğraf yok.</p>';
+            }
+
+        } catch (error) {
+            console.error("Hata:", error);
+            galleryContainer.innerHTML = '<p class="loading">Fotoğraflar çekilirken bir hata oluştu.</p>';
         }
-    });
-
-    function updateInterface() {
-        corridors.forEach(cor => {
-            const btn = document.querySelector(`button[data-cor="${cor}"]`);
-            if(btn) btn.innerText = cor.replace("F2", "F2 ") + " (" + counts[cor] + ")";
-        });
-        updateMainCounter();
-    }
-
-    function updateMainCounter() {
-        const visible = document.querySelectorAll(".gallery img:not(.hidden)").length;
-        document.getElementById("countText").innerText = visible;
-    }
-
-    function applyFilter(cat, btn) {
-        document.querySelectorAll(".gallery img").forEach(img => {
-            (cat === 'all' || img.classList.contains(cat)) ? img.classList.remove("hidden") : img.classList.add("hidden");
-        });
-        document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        updateMainCounter();
     }
 </script>
-
 </body>
 </html>
+
