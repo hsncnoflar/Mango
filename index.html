@@ -5,89 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mango Stok Hataları</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #000; color: #fff; }
-        header { background: #111; padding: 25px; text-align: center; border-bottom: 2px solid #333; position: sticky; top: 0; z-index: 100; }
-        .arvato-logo { position: absolute; left: 20px; top: 30px; font-weight: bold; color: #fff; font-size: 14px; letter-spacing: 1px; }
-        h1 { margin: 0; font-size: 22px; letter-spacing: 4px; font-weight: 300; }
-        
-        nav { background: #1a1a1a; display: flex; flex-wrap: wrap; justify-content: center; padding: 10px; border-bottom: 1px solid #333; }
-        nav button { 
-            background: #252525; color: #888; border: 1px solid #333; padding: 8px 15px; 
-            margin: 4px; cursor: pointer; border-radius: 4px; font-size: 13px; transition: 0.3s;
+        :root {
+            --arvato-blue: #0054a6;
+            --bg-light: #f4f7f9;
+            --white: #ffffff;
+            --text-dark: #333;
         }
-        nav button:hover { background: #333; color: #fff; border-color: #555; }
-        nav button.active { background: #fff; color: #000; font-weight: bold; border-color: #fff; }
 
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; padding: 25px; }
-        .gallery img { width: 100%; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #222; }
-        .status-msg { text-align: center; width: 100%; color: #666; margin-top: 50px; font-style: italic; font-size: 14px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: var(--bg-light); color: var(--text-dark); }
+        
+        header { 
+            background: var(--white); 
+            padding: 15px 20px; 
+            text-align: center; 
+            border-bottom: 3px solid var(--arvato-blue); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .arvato-logo { font-weight: 800; color: var(--arvato-blue); font-size: 16px; letter-spacing: 1px; }
+        h1 { margin: 0; font-size: 20px; letter-spacing: 2px; color: #000; text-transform: uppercase; }
+        
+        nav { background: #e9eff5; display: flex; flex-wrap: wrap; justify-content: center; padding: 10px; gap: 8px; }
+
+        nav button { 
+            background: var(--white); 
+            color: var(--arvato-blue); 
+            border: 1px solid #cbd5e0; 
+            padding: 10px 16px; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Fotoğraf sayısı rozeti */
+        .count-badge {
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        nav button:hover { background: #f0f4f8; border-color: var(--arvato-blue); }
+        nav button.active { background: var(--arvato-blue); color: var(--white); border-color: var(--arvato-blue); }
+        nav button.active .count-badge { background: rgba(255,255,255,0.2); color: white; }
+
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 25px; }
+        .gallery img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border: 1px solid #ddd; }
+        .status-msg { text-align: center; width: 100%; color: #718096; margin-top: 50px; font-style: italic; }
+
+        @media (min-width: 768px) {
+            .header-container { flex-direction: row; justify-content: center; }
+            .arvato-logo { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); }
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="arvato-logo">ARVATO</div>
-    <h1>MANGO STOK HATALARI</h1>
+    <div class="header-container">
+        <div class="arvato-logo">ARVATO</div>
+        <h1>MANGO STOK HATALARI</h1>
+    </div>
 </header>
 
 <nav id="tabs"></nav>
-<div id="gallery" class="gallery"><p class="status-msg">Lütfen kontrol etmek istediğiniz koridoru seçin.</p></div>
+<div id="gallery" class="gallery"><p class="status-msg">Koridorlardaki hata sayıları hesaplanıyor, lütfen bekleyin...</p></div>
 
 <script>
     const username = "hsncnoflar";
-    const repo = "Mango"; // Büyük M harfi ile
+    const repo = "Mango"; 
     const tabsContainer = document.getElementById('tabs');
     const galleryContainer = document.getElementById('gallery');
 
-    // Koridorları tam istediğin formatta (F2_001) oluşturuyoruz
     const corridors = Array.from({ length: 18 }, (_, i) => `F2_${String(i + 1).padStart(3, '0')}`);
 
-    corridors.forEach(corridor => {
-        const btn = document.createElement('button');
-        // Kullanıcı butonlarda boşluk görsün (F2 001), ama kod alt tireyle (F2_001) arasın
-        btn.innerText = corridor.replace('_', ' '); 
-        btn.onclick = () => fetchImages(corridor, btn);
-        tabsContainer.appendChild(btn);
-    });
+    // Başlangıçta butonları oluştur ve sayıları çekmeye başla
+    async function init() {
+        for (const corridor of corridors) {
+            const btn = document.createElement('button');
+            const corridorLabel = corridor.replace('_', ' ');
+            btn.innerHTML = `${corridorLabel} <span class="count-badge" id="count-${corridor}">...</span>`;
+            btn.onclick = () => fetchImages(corridor, btn);
+            tabsContainer.appendChild(btn);
+            
+            // Her koridor için sayıyı arka planda al
+            updateCount(corridor);
+        }
+        galleryContainer.innerHTML = '<p class="status-msg">Lütfen bir koridor seçin.</p>';
+    }
+
+    async function updateCount(corridorName) {
+        try {
+            const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/img/${corridorName}`);
+            if (response.ok) {
+                const data = await response.json();
+                const count = data.filter(file => file.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)).length;
+                document.getElementById(`count-${corridorName}`).innerText = count;
+            } else {
+                document.getElementById(`count-${corridorName}`).innerText = '0';
+            }
+        } catch (e) {
+            document.getElementById(`count-${corridorName}`).innerText = '?';
+        }
+    }
 
     async function fetchImages(folderName, activeBtn) {
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
         activeBtn.classList.add('active');
-        galleryContainer.innerHTML = '<p class="status-msg">Fotoğraflar getiriliyor...</p>';
+        galleryContainer.innerHTML = '<p class="status-msg">Görseller yükleniyor...</p>';
 
         try {
-            // Tam yol: img/F2_001
-            const folderPath = `img/${folderName}`;
-            const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folderPath}`;
-            
-            const response = await fetch(apiUrl);
-            
-            if (!response.ok) {
-                galleryContainer.innerHTML = `<p class="status-msg">Henüz fotoğraf eklenmemiş veya klasör bulunamadı: ${folderPath}</p>`;
-                return;
-            }
-
+            const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/img/${folderName}`);
             const files = await response.json();
             galleryContainer.innerHTML = ''; 
 
-            let imageFound = false;
             files.forEach(file => {
                 if (file.name.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
-                    imageFound = true;
                     const img = document.createElement('img');
                     img.src = file.download_url;
                     galleryContainer.appendChild(img);
                 }
             });
-
-            if (!imageFound) {
-                galleryContainer.innerHTML = '<p class="status-msg">Klasör boş, içinde fotoğraf yok.</p>';
-            }
-
         } catch (error) {
-            galleryContainer.innerHTML = '<p class="status-msg">Bağlantı hatası oluştu. Lütfen internetinizi kontrol edin.</p>';
+            galleryContainer.innerHTML = '<p class="status-msg">Bu koridorda henüz fotoğraf yok.</p>';
         }
     }
+
+    init();
 </script>
 </body>
 </html>
